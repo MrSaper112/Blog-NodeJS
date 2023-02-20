@@ -1,0 +1,34 @@
+<body>
+    {{> header path="../" }}
+
+    <div class="bigBlog">
+        <link rel="stylesheet" href="../styles/style.css">
+
+        {{!-- Creating blog --}}
+        <h1 class="title" style="margin-bottom:0px">{{blog.title}}</h1>
+        <h3 style="margin-top:0px">{{blog.author}}</h3>
+
+        {{!-- Render Each parts of blog --}}
+        {{#each blog.blogContent}}
+        {{#testCond this.type "text"}}
+        <span>{{this.text}}</span>
+        {{/testCond}}
+
+        {{#testCond this.type "img"}}
+        <img class="innerBox" src="../uploads/image/{{this.file}}" style="width: {{this.size}}%;" alt="{{this.file}}">
+        {{/testCond}}
+
+        {{#testCond this.type "video"}}
+        <video class="innerBox" src="../uploads/video/{{this.file}}" style="width: {{this.size}}%;" alt="{{this.file}}"
+            controls></video>
+        {{/testCond}}
+
+        {{#testCond this.type "audio"}}
+        <audio class="innerBox" src="../uploads/audio/{{this.file}}" style="width: 20rem;" alt="{{this.file}}"
+            controls></audio>
+        {{/testCond}}
+
+        {{/each}}
+        <script type="text/javascript" src="../scripts/main.js"></script>
+
+</body>

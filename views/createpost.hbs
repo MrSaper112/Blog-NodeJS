@@ -1,0 +1,292 @@
+<body>
+    {{!-- Blog Creator Page --}}
+    <div class="createBlogContainer">
+        {{!-- Buttons --}}
+        <div class="containerMenu">
+            <button class="button-4" id="addTextButton">Add Text</button>
+            <button class="button-4" id="addPictureButton">Add Picture</button>
+            <button class="button-4" id="addVideoButton">Add Video</button>
+            <button class="button-4" id="addAudioButton">Add Audio</button>
+            <input type="checkbox" style="width:25px;height:25px" id="publicContentCheckbox"
+                name="publicContentCheckbox"><span>Is Public?</span>
+            <button class="button-4" style="background-color:greenyellow" id="saveButton">Save</button>
+            <button class="button-4" style="background-color:red" id="discardButton">Discard</button>
+        </div>
+
+        {{!-- Workflow --}}
+        <div id="blogContent" class="containerBlog">
+            <form id="createBlogForm">
+                <div class="inputBlock">
+                    <label style="padding-left:10px" for="title">Title: </label>
+                    <input type="text" id="title" name="title" class="inputText" required>
+                    <label style="padding-left:10px" for="thumbnail">Thumbnail:</label>
+                    <input style="padding-left:10px" type="file" id="thumbnail" accept="image/*">
+                </div>
+
+            </form>
+        </div>
+    </div>
+    {{#section 'script'}}
+    <script type="text/javascript">
+        // Get Buttons 
+        let addTextButton = document.getElementById('addTextButton');
+        let addPictureButton = document.getElementById('addPictureButton');
+        let addVideoButton = document.getElementById('addVideoButton');
+        let addAudioButton = document.getElementById('addAudioButton');
+        let saveButton = document.getElementById('saveButton');
+        let discardButton = document.getElementById('discardButton');
+
+        let createBlogForm = document.getElementById('createBlogForm');
+        let blogContent = document.getElementById('blogContent');
+
+        let thumbnail = document.getElementById('thumbnail');
+        let title = document.getElementById('title');
+
+        let allInputs = []
+        let toServer = { isPublic: false }
+
+        let id = 0
+        let position = 0
+
+        // Add events handling
+        discardButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this item?')) document.location.href = "/"
+        })
+        saveButton.addEventListener('click', async () => {
+            let counter = 0
+
+            let form = new FormData()
+            if (title.value == "") { alert("Title is required!"); return }
+            if (allInputs.length == 0) { alert("Blog must not be empty!"); return }
+
+            // Create Form data to server
+            form.append("title", JSON.stringify(title.value))
+            form.append("public", JSON.stringify(toServer.isPublic))
+            if (thumbnail.files.length == 1) {
+                form.append("thumbnail", thumbnail.files[0])
+            }
+
+            // Map workflow
+            allInputs.forEach((item) => {
+                console.log(item)
+                if (item.type == "text") {
+                    if (item.input.value != "") form.append(counter, JSON.stringify({ type: item.type, value: item.input.value }))
+                } else {
+
+                    if (item.input.files[0] != undefined) {
+                        // Creates a special id for linking objects image, audio, video to blog item
+                        let hash = makeid(10)
+                        form.append(counter, JSON.stringify({ type: item.type, file: hash, size: item.size }))
+                        form.append(hash, item.input.files[0])
+                    }
+
+                }
+                counter++
+            })
+
+            // Send data to server
+            const response = await fetch("/createpost", {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                body: form
+            });
+
+            let json = await response.json()
+            if (json.succes) document.location.href = "/"
+        })
+
+
+        // Is public 
+        publicContentCheckbox.addEventListener('change', (e) => {
+            toServer.isPublic = e.target.checked
+        })
+
+        // Text Input Box Creations
+        addTextButton.onclick = () => {
+            let div = document.createElement('div');
+            let input = document.createElement('textarea');
+            input.placeholder = "Insert text here"
+            input.classList.add("inputText")
+
+            input.style.width = (blogContent.clientWidth - 70) + "px"
+            input.style.maxWidth = (blogContent.clientWidth - 70) + "px"
+            input.style.minWidth = (blogContent.clientWidth - 70) + "px"
+
+            // Resize workflow
+            input.addEventListener("keydown", function (e) {
+                this.style.height = "auto";
+                this.style.height = (this.scrollHeight) + "px";
+            }, false)
+            input.addEventListener("paste", function (e) {
+                this.style.height = "auto";
+                this.style.height = (this.scrollHeight) + "px";
+            }, false)
+            input.addEventListener("keyup", function (e) {
+                this.style.height = "auto";
+                this.style.height = (this.scrollHeight) + "px";
+            }, false)
+
+            let deleteButton = document.createElement("span");
+            deleteButton.innerText = "DELETE"
+            deleteButton.classList.add("deleteButton")
+
+
+            div.appendChild(input);
+            div.appendChild(deleteButton);
+            div.classList.add("inputBlock")
+            var copyID = id
+
+            allInputs.push({ id: copyID, type: "text", input: input })
+
+            // Remove item from list
+            deleteButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                div.remove()
+                allInputs = allInputs.filter(i => i.id != copyID)
+                console.log(allInputs)
+            })
+            createBlogForm.appendChild(div)
+            id++
+        }
+        // Auto resize boxes 
+        window.onresize = (e) => {
+            let width = (blogContent.clientWidth - 25) + "px"
+            allInputs.forEach(input => {
+                if (input.type == "text") {
+                    input.input.style.width = width
+                    input.input.style.maxWidth = (blogContent.clientWidth - 70) + "px"
+                    input.input.style.minWidth = (blogContent.clientWidth - 70) + "px"
+                } else {
+                    input.input.style.width = width
+                    input.input.style.maxWidth = (blogContent.clientWidth - 25) + "px"
+                    input.input.style.minWidth = (blogContent.clientWidth - 25) + "px"
+                }
+            })
+        }
+        // Adding Video, Audio, Image event
+        addPictureButton.addEventListener("click", (event) => {
+            let input = new InputType("img", false)
+            console.log(input)
+        })
+        addVideoButton.addEventListener("click", (event) => {
+            let input = new InputType("video", true)
+            console.log(input)
+        })
+        addAudioButton.addEventListener("click", (event) => {
+            console.log("mac")
+            let input = new InputType("audio", true)
+            console.log(input)
+        })
+
+        // Class that creates Audio, Video, Image containers
+        class InputType {
+            constructor(type, controls) {
+                this.type = type
+                this.constrols = controls | false
+                this.generateCode()
+            }
+            generateCode() {
+                let div = document.createElement("div")
+
+                let input = document.createElement("input")
+                input.type = "file"
+
+                // Choose type of container
+                if (this.type == "img") input.accept = "image/gif, image/jpeg, image/png"
+                else if (this.type == "video") input.accept = "video/mp4,video/x-m4v,video/*"
+                else if (this.type == "audio") input.accept = "audio/mp4,audio/x-m4v,audio/*"
+
+                let image = document.createElement(this.type)
+                image.alt = "Image Not Loaded!"
+
+                if (this.constrols) image.controls = true
+
+                // Size of block
+                let inputRangeResize = document.createElement("input")
+                inputRangeResize.type = "range"
+                inputRangeResize.min = 0
+                inputRangeResize.max = 100
+                inputRangeResize.style.width = "200px"
+
+                let inputResize = 50
+
+                let span = document.createElement("span")
+                span.innerText = "Scale"
+
+                let prefix = document.createElement("span")
+                prefix.innerText = "0%"
+
+                let sufix = document.createElement("span")
+                sufix.innerText = "100%"
+
+                input.addEventListener("change", (e) => {
+                    image.src = URL.createObjectURL(e.target.files[0]);
+                    if (this.type !== 'audio') image.style.height = 'auto'
+                    image.style.width = '50%'
+
+                });
+
+                inputRangeResize.addEventListener("change", (e) => {
+                    image.style.width = e.target.value + "%"
+                    inputResize = e.target.value
+                })
+
+                let slider = document.createElement("div")
+                slider.append(prefix)
+                slider.append(inputRangeResize)
+                slider.append(sufix)
+                slider.classList.add("slider")
+
+                let deleteButton = document.createElement("span");
+                deleteButton.innerText = "DELETE"
+                deleteButton.classList.add("deleteButton")
+
+
+                div.classList.add("inputBlock")
+
+                // Appen components to one box
+                var copyID = id
+                div.appendChild(input)
+                if (this.type !== 'audio') {
+                    var br = document.createElement("br")
+                    div.appendChild(br)
+                    div.appendChild(span)
+                    div.appendChild(slider)
+                    let br2 = document.createElement("br")
+                    div.appendChild(br2)
+                }
+                div.appendChild(image)
+                div.appendChild(deleteButton)
+
+                createBlogForm.appendChild(div)
+
+                let output = { id: copyID, type: this.type, input: input, size: inputResize }
+
+                // Delete handler 
+                deleteButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    div.remove()
+                    allInputs = allInputs.filter(i => i.id != copyID)
+
+                    console.log(allInputs)
+                })
+                id++
+                allInputs.push(output)
+                return div
+            }
+
+        }
+        // Create random id 
+        function makeid(length) {
+            var result = '';
+            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for (var i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() *
+                    charactersLength));
+            }
+            return result;
+        }
+
+    </script>
+    {{/section}}
+</body>

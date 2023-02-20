@@ -1,0 +1,33 @@
+{
+    "dependencies": {
+        "aws-sdk": "^2.1167.0",
+        "bluebird": "^3.7.2",
+        "blueimp-md5": "^2.19.0",
+        "body-parser": "^1.20.0",
+        "connect-pg-simple": "^7.0.0",
+        "cookie-parser": "^1.4.6",
+        "ejs": "^3.1.8",
+        "express": "^4.18.1",
+        "express-handlebars": "^6.0.6",
+        "express-session": "^1.17.3",
+        "formidable": "^2.0.1",
+        "handlebars": "^4.7.7",
+        "hbs": "^4.2.0",
+        "log4js": "^6.6.0",
+        "mysql": "^2.18.1",
+        "nodemon": "^2.0.18",
+        "pg": "^8.7.3",
+        "pg-promise": "^10.11.1"
+    },
+    "name": "code",
+    "version": "1.0.0",
+    "main": "app.js",
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node app.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": ""
+}

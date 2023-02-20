@@ -1,0 +1,90 @@
+<body>
+    {{> header path="./" }}
+
+    <link rel="stylesheet" href="./styles/style.css">
+
+    {{!-- Register Form --}}
+
+    <div id="popoutRegister">
+        <span id="message"></span>
+        <form id="registerForm">
+            <input type="text" name="firstName" placeholder="First Name" required>
+            <input type="text" name="lastName" placeholder="Last Name" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="date" name="birthday" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="password" name="repeatPassword" placeholder="Repeat password" required><br>
+            <input type="submit" class="button-4">
+
+
+        </form>
+    </div>
+
+    {{#section 'script'}}
+    <script src="./scripts/crypto.js"></script>
+
+    <script type="text/javascript">
+
+        //Define const variables from register Form
+        const registerForm = document.getElementById("registerForm")
+        const errorBox = document.getElementById('message')
+
+        registerForm.addEventListener('submit', registerUser);
+        registerForm.birthday.max = new Date().toISOString().split("T")[0]
+
+        function registerUser(event) {
+            event.preventDefault()
+
+            //Get data all  from form
+            let firstName = event.target.firstName.value
+            let lastName = event.target.lastName.value
+            let email = event.target.email.value
+            let birthday = event.target.birthday.value
+            let password = event.target.password.value
+            let repeatPassword = event.target.repeatPassword.value
+
+            // Check if variables are defined
+            if (firstName === "") { errorBox.innerText = ("Please enter first name"); return }
+            if (lastName === "") { errorBox.innerText = ("Please enter last name"); return }
+            if (email === "") { errorBox.innerText = ("Please enter email"); return }
+            if (birthday === "") { errorBox.innerText = ("Please enter birthday"); return }
+            if (password === "") { errorBox.innerText = ("Please enter password"); return }
+            if (repeatPassword === "") { errorBox.innerText = ("Please repeat password"); return }
+
+            //Check password for policy
+            let policy = checkPasswordPolicy(password)
+            if (!policy.pass) { errorBox.innerText = policy.errorMessage; return }
+
+
+            if (password == repeatPassword) {
+                //Encrypt password before send 
+                var encyptedPasswd = CryptoJS.AES.encrypt(password, email).toString();
+
+                let form = { firstName: firstName, lastName: lastName, email: email, birthday: birthday, password: encyptedPasswd }
+
+                //Send Form
+                postData('./register', form)
+                    .then((response) => {
+                        console.log(response)
+                        if (!response.accountCreated) errorBox.innerText = response.errorMessage
+                        else document.location.href = "/"
+                    })
+            } else {
+                errorBox.innerText = ("Second password is not the same as first password");
+            }
+        }
+
+        //Function to check password policy
+        function checkPasswordPolicy(passwd) {
+            console.log(passwd.length)
+            if (passwd.length < 8) return { pass: false, errorMessage: "Password must be at least 8 characters" }
+            if (passwd.length > 20) return { pass: false, errorMessage: "Password must have less than 20 characters" }
+            if (!(passwd.includes("*") || passwd.includes("!") || passwd.includes("@") || passwd.includes("#") || passwd.includes("$") || passwd.includes("%") || passwd.includes("^") || passwd.includes("*") || passwd.includes("&"))) return { pass: false, errorMessage: "Password must have at least one character (!,@,#,$,%,^,&,*)" }
+            else return { pass: true }
+        }
+
+    </script>
+    <script type="text/javascript" src="./scripts/main.js"></script>
+
+    {{/section}}
+</body>

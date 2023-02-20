@@ -1,0 +1,87 @@
+<body>
+    <link rel="stylesheet" href="./styles/style.css">
+    {{> header path="./" }}
+    {{!-- Main page site --}}
+    <div class="mainSite">
+        {{!-- Public content --}}
+        <h1>Public Posts</h1>
+        <div class="topicContent">
+
+            {{!-- Loop for public blogs list returned from server --}}
+            {{#each publicBlogs}}
+            <div class="singlePost" style="cursor:pointer" onclick="gotopost('{{this.title}}-{{this.id}}')">
+
+                {{!-- Set thumbnail if exist --}}
+                {{#if this.thumbnail}}
+                <img src="uploads/thumbnail/{{this.thumbnail}}" style="height: 10rem;" alt="{{this.thumbnail}}">
+                {{/if}}
+
+                {{!-- Show title, and author with description, first 25 letter --}}
+                <div style="display: flex;flex-direction: column;}">
+                    <span class="titleBlog"
+                        style="padding-left: 1rem; font-size: 20px; padding-top:10px">{{this.title}}</span>
+                    <span class="titleBlog"
+                        style="padding-left: 1rem; font-weight:bold; font-size: 10px; padding-top:10px">Author:
+                        {{this.author}}</span>
+
+                    {{#testOpos this.description '' }}
+                    <span style="padding-left: 1rem;">{{this.description}}.... <span style="color:blue"
+                            onclick="gotopost('{{this.title}}-{{this.id}}')">Read me</span></span>
+                    {{/testOpos}}
+                </div>
+                {{#testCond this.type "text"}}
+                <span>DUPA</span>
+                {{/testCond}}
+            </div>
+            {{/each}}
+        </div>
+        <br>
+
+        {{!-- Private content only for logged in --}}
+        {{#if privateBlogs}}
+        <h1>Private Posts</h1>
+
+        <div class="topicContent">
+
+            {{!-- Loop for private blogs list returned from server --}}
+            {{#each privateBlogs}}
+            <div class="singlePost" style="cursor:pointer" onclick="gotopost('{{this.title}}-{{this.id}}')">
+
+                {{!-- Set thumbnail if exist --}}
+                {{#if this.thumbnail}}
+                <img src="uploads/thumbnail/{{this.thumbnail}}" style="height: 10rem;" alt="{{this.thumbnail}}">
+                {{/if}}
+                <div style="display: flex;flex-direction: column;}">
+
+                    {{!-- Show title, and author with description, first 25 letter --}}
+                    <span class="titleBlog"
+                        style="padding-left: 1rem; font-size: 20px; padding-top:10px">{{this.title}}</span>
+                    <span class="titleBlog"
+                        style="padding-left: 1rem; font-weight:bold; font-size: 10px; padding-top:10px">Author:
+                        {{this.author}}</span>
+                    {{#testOpos this.description '' }}
+                    <span style="padding-left: 1rem;">{{this.description}}.... <span style="color:blue"
+                            onclick="gotopost('{{this.title}}-{{this.id}}')">Read me</span></span>
+                    {{/testOpos}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        {{/if}}
+
+    </div>
+    {{#section 'script'}}
+
+    <script type="text/javascript">
+
+        // Redirect to post
+        function gotopost(id) {
+            document.location.href += "blog/" + id.replaceAll(" ", "_")
+        }
+
+
+    </script>
+    <script type="text/javascript" src="./scripts/main.js"></script>
+
+    {{/section}}
+</body>

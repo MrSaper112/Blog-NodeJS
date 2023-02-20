@@ -1,0 +1,57 @@
+<body>
+    {{> header path="./" }}
+
+    <link rel="stylesheet" href="./styles/style.css">
+
+    {{!-- Login Form --}}
+
+    <div id="popoutLogin">
+        <span id="message"></span>
+        <form id="loginForm">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input class="button-4" type="submit">
+        </form>
+    </div>
+
+    {{#section 'script'}}
+    <script src="./scripts/crypto.js"></script>
+
+    <script type="text/javascript">
+
+        //Define const variables from login Form
+        const loginFrom = document.getElementById("loginForm");
+        const errorBox = document.getElementById('message')
+
+        loginFrom.addEventListener("submit", loginUser)
+
+        function loginUser(event) {
+            event.preventDefault()
+
+            //Get email and password from form
+            let email = event.target.email.value
+            let password = event.target.password.value
+
+            //Check if variables are not empty 
+            if (email === "") { errorBox.innerText = ("Please enter email"); return }
+            if (password === "") { errorBox.innerText = ("Please enter password"); return }
+
+            //Encrypt Password
+            var encyptedPasswd = CryptoJS.AES.encrypt(password, email).toString();
+
+            //Send form to nodejs server
+            let form = { email: email, password: encyptedPasswd }
+            postData('./login', form)
+                .then(response => {
+
+                    // await for response
+                    if (response.logged) document.location.href = "/"
+                    else errorBox.innerText = response.errorMessage
+                })
+
+        }
+    </script>
+    <script type="text/javascript" src="./scripts/main.js"></script>
+
+    {{/section}}
+</body>

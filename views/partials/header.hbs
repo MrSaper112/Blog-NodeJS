@@ -1,0 +1,13 @@
+<div class="menuContainer">
+    <a class="blogName" href="{{path}}">BLOG</a>
+    <div class="loginContainer">
+        {{#if logged}}
+        <a class="button-4" href="{{path}}logout">Logout</a>
+        <a class="button-4" href="{{path}}createpost">Create Post</a>
+        {{else}}
+        <a id="loginButton" class="button-4" href="{{path}}login">Login</a>
+        <a id="registerButton" class="button-4" href="{{path}}register">Register</a>
+        {{/if}}
+    </div>
+
+</div>
